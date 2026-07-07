@@ -3,39 +3,49 @@ const cors = require('cors');
 const app = express();
 
 // --------------------------
-// ✅ CORS CONFIGURATION
+// Basic Setup
 // --------------------------
+// Allow requests ONLY from your Netlify frontend
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://regal-clafoutis-1dc712.netlify.app",
-    "https://openclass-site.netlify.app"
-  ],
+  origin: "https://openclass-site.netlify.app",
   credentials: true
 }));
 
-// --------------------------
-// ✅ MIDDLEWARE
-// --------------------------
-app.use(express.json()); // Parse JSON request bodies
+// Parse JSON data from requests
+app.use(express.json());
 
 // --------------------------
-// ✅ YOUR DATABASE / ROUTES GO HERE
+// Test Route
 // --------------------------
-// Keep all your existing code below this line — example structure:
-// const db = require('./your-db-file');
-// app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/courses', require('./routes/courses'));
-
-// Example root route
 app.get('/', (req, res) => {
-  res.send('OpenClass Server is LIVE! 🚀');
+  res.send('✅ OpenClass Backend is LIVE and working!');
 });
 
 // --------------------------
-// ✅ START SERVER
+// API Routes (matches your frontend)
+// --------------------------
+app.post('/api/register', (req, res) => {
+  // You can add your database logic here later
+  console.log('📥 Register data received:', req.body);
+  res.json({
+    success: true,
+    message: "✅ Registration successful!"
+  });
+});
+
+app.post('/api/login', (req, res) => {
+  // You can add your database check here later
+  console.log('📥 Login data received:', req.body);
+  res.json({
+    success: true,
+    message: "✅ Login successful!"
+  });
+});
+
+// --------------------------
+// Start Server
 // --------------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
