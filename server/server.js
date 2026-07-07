@@ -1,48 +1,41 @@
-// Import required modules
 const express = require('express');
-const cors = require('cors'); // added for frontend connection
-const { Sequelize } = require('sequelize');
+const cors = require('cors');
 const app = express();
 
-// Enable CORS so your frontend can connect
-app.use(cors());
-
-// Middleware to read JSON and form data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ✅ Homepage route
-app.get('/', (req, res) => {
-  res.send(`
-    <h1>✅ OpenClass Server is LIVE!</h1>
-    <p>Status: Running correctly</p>
-    <p>Database: Connected</p>
-    <p>API URL: https://openclass-gqzp.onrender.com</p>
-  `);
-});
+// --------------------------
+// ✅ CORS CONFIGURATION
+// --------------------------
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://regal-clafoutis-1dc712.netlify.app",
+    "https://openclass-site.netlify.app"
+  ],
+  credentials: true
+}));
 
 // --------------------------
-// YOUR ORIGINAL CODE STARTS HERE
+// ✅ MIDDLEWARE
 // --------------------------
+app.use(express.json()); // Parse JSON request bodies
 
-// Database connection
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './database.sqlite'
-});
-
-// Test database connection
-sequelize.authenticate()
-  .then(() => console.log('✅ Database connected & ready'))
-  .catch(err => console.error('❌ Database connection error:', err));
-
-// 📌 Add all your original routes, models, and code here
-// Example:
+// --------------------------
+// ✅ YOUR DATABASE / ROUTES GO HERE
+// --------------------------
+// Keep all your existing code below this line — example structure:
+// const db = require('./your-db-file');
 // app.use('/api/auth', require('./routes/auth'));
 // app.use('/api/courses', require('./routes/courses'));
 
-// Start server
-const PORT = process.env.PORT || 10000;
+// Example root route
+app.get('/', (req, res) => {
+  res.send('OpenClass Server is LIVE! 🚀');
+});
+
+// --------------------------
+// ✅ START SERVER
+// --------------------------
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
