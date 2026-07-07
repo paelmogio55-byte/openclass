@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [form, setForm] = useState({ fullName: '', email: '', password: '', role: 'student' });
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -14,7 +15,6 @@ const Register = () => {
     setError('');
 
     try {
-      // ✅ Uses your .env variable correctly
       const API_BASE = import.meta.env.VITE_API_URL;
       const res = await fetch(`${API_BASE}/register`, {
         method: 'POST',
@@ -24,7 +24,9 @@ const Register = () => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Registration failed');
-      alert('Registration successful! You can now log in.');
+
+      alert('Registration successful!');
+      navigate('/login');
     } catch (err: any) {
       setError(err.message);
     }
@@ -33,9 +35,10 @@ const Register = () => {
   return (
     <div style={{ maxWidth: '400px', margin: '2rem auto', padding: '0 1rem' }}>
       <h2 style={{ textAlign: 'center' }}>Create Account</h2>
-      {error && <div style={{ color: 'red', padding: '0.5rem', marginBottom: '1rem', borderRadius: '4px' }}>{error}</div>}
+      {error && <div style={{ color: 'red', padding: '0.5rem', marginBottom: '1rem', backgroundColor: '#ffe5e5', borderRadius: '4px' }}>{error}</div>
+      
       <form onSubmit={handleSubmit}>
-        <div>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Full Name</label>
           <input
             type="text"
@@ -46,7 +49,7 @@ const Register = () => {
             style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
           />
         </div>
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Email</label>
           <input
             type="email"
@@ -57,7 +60,7 @@ const Register = () => {
             style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
           />
         </div>
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Password</label>
           <input
             type="password"
@@ -68,7 +71,7 @@ const Register = () => {
             style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
           />
         </div>
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginBottom: '1.5rem' }}>
           <label>Account Type</label>
           <select
             name="role"
@@ -82,22 +85,12 @@ const Register = () => {
         </div>
         <button
           type="submit"
-          style={{
-            width: '100%',
-            padding: '0.7rem',
-            marginTop: '1.5rem',
-            background: '#2563eb',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            cursor: 'pointer'
-          }}
+          style={{ width: '100%', padding: '0.75rem', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1rem' }}
         >
           Register
         </button>
       </form>
-      <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+      <p style={{ textAlign: 'center', marginTop: '1.5rem' }}>
         Already have an account? <Link to="/login" style={{ color: '#2563eb' }}>Login here</Link>
       </p>
     </div>

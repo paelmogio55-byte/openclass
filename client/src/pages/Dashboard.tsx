@@ -1,164 +1,153 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-type ClassType = {
-  id: number;
-  name: string;
-  code: string;
-  description?: string;
-};
-
 const Dashboard = () => {
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
-  const [classes, setClasses] = useState<ClassType[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [newClassName, setNewClassName] = useState('');
-  const [newClassDesc, setNewClassDesc] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const API = import.meta.env.VITE_API_URL;
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    if (!storedUser || !token) {
-      navigate('/login');
-      return;
-    }
-    setUser(JSON.parse(storedUser));
-    fetchClasses();
-  }, [navigate]);
-
-  const fetchClasses = async () => {
-    try {
-      const res = await fetch(`${API}/classes`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      if (!res.ok) throw new Error('Failed to load classes');
-      const data = await res.json();
-      setClasses(data);
-    } catch (err) {
-      setError('Could not load classes');
-    }
-  };
-
-  const handleCreateClass = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    try {
-      const res = await fetch(`${API}/classes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          name: newClassName.trim(),
-          description: newClassDesc.trim()
-        })
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to create class');
-      }
-      await fetchClasses();
-      setShowModal(false);
-      setNewClassName('');
-      setNewClassDesc('');
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+  const [activeNav, setActiveNav] = useState('Home');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
     navigate('/login');
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-      {/* Navbar */}
-      <header style={{ backgroundColor: '#1e40af', color: 'white', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: '1.25rem' }}>OpenClass</h1>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          {user && <span>Welcome, {user.name} ({user.role})</span>}
-          <button onClick={handleLogout} style={{ background: 'white', color: '#1e40af', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer' }}>Logout</button>
+    <div style={{
+      display: 'flex',
+      height: '100vh',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif',
+      backgroundColor: '#ffffff',
+      color: '#111827'
+    }}>
+
+      {/* Sidebar */}
+      <aside style={{
+        width: '220px',
+        borderRight: '1px solid #e5e7eb',
+        padding: '1.5rem 1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.5rem'
+      }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: '0 0 2rem 0' }}>OpenClass</h2>
+
+        {[
+          { name: 'Home', icon: '🏠' },
+          { name: 'Chat', icon: '💬' },
+          { name: 'To Do', icon: '📝' },
+          { name: 'Calendar', icon: '📅' },
+          { name: 'Drive', icon: '📁' },
+          { name: 'Blackboard', icon: '🧾' },
+          { name: 'Mirroring', icon: '🖥️' }
+        ].map(item => (
+          <button
+            key={item.name}
+            onClick={() => setActiveNav(item.name)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              border: 'none',
+              borderRadius: '8px',
+              backgroundColor: activeNav === item.name ? '#f3f4f6' : 'transparent',
+              textAlign: 'left',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              width: '100%'
+            }}
+          >
+            <span>{item.icon}</span>
+            {item.name}
+          </button>
+        ))}
+
+        <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.95rem',
+              cursor: 'pointer'
+            }}
+          >
+            Logout
+          </button>
         </div>
-      </header>
+      </aside>
 
       {/* Main Content */}
-      <main style={{ maxWidth: '1200px', margin: '2rem auto', padding: '0 1.5rem' }}>
-        {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem' }}>{error}</div>}
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', color: '#1e293b' }}>My Classes</h2>
-          {user?.role === 'teacher' && (
-            <button onClick={() => setShowModal(true)} style={{ background: '#2563eb', color: 'white', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '4px', fontSize: '1rem', cursor: 'pointer' }}>
-              + Create Class
-            </button>
-          )}
+      <main style={{ flex: 1, padding: '1.5rem 2rem', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '2rem' }}>
+          <button style={{ padding: '0.4rem 1rem', border: '1px solid #d1d5db', borderRadius: '20px', background: 'white', cursor: 'pointer' }}>No lessons</button>
+          <button style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid #d1d5db', background: 'white', fontSize: '1.1rem', cursor: 'pointer' }}>+</button>
         </div>
 
-        {classes.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            No classes yet. Create your first class!
+        <div style={{
+          background: 'linear-gradient(90deg, #fcd34d 0%, #ec4899 50%, #8b5cf6 100%)',
+          borderRadius: '16px',
+          padding: '2rem',
+          color: 'white',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '2rem'
+        }}>
+          <div>
+            <h2 style={{ fontSize: '1.75rem', margin: '0 0 0.5rem 0' }}>Your first classroom is ready</h2>
+            <p style={{ opacity: '0.9', margin: '0 0 1.25rem 0' }}>Three demo students are inside. Try the blackboard, courseware, and tools.</p>
+            <button style={{ padding: '0.6rem 1.25rem', border: 'none', borderRadius: '8px', background: 'white', color: '#111827', fontWeight: '600', cursor: 'pointer' }}>▶ Try Now</button>
           </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-            {classes.map((cls) => (
-              <div key={cls.id} style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                <h3 style={{ fontSize: '1.2rem', margin: '0 0 0.5rem 0', color: '#1e293b' }}>{cls.name}</h3>
-                <p style={{ color: '#475569', margin: '0.25rem 0' }}><strong>Code:</strong> {cls.code}</p>
-                {cls.description && <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0.5rem 0' }}>{cls.description}</p>}
-                <button onClick={() => navigate(`/class/${cls.id}`)} style={{ marginTop: '1rem', background: '#2563eb', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', width: '100%' }}>
-                  Enter Class
-                </button>
-              </div>
+          <div style={{ width: '280px', height: '140px', background: 'rgba(255,255,255,0.2)', borderRadius: '8px' }}></div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ background: '#3b82f6', borderRadius: '12px', padding: '1.5rem', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>+ New Class</h3>
+              <p style={{ opacity: '0.9', margin: 0, fontSize: '0.95rem' }}>Versatile learning modes available</p>
+            </div>
+            <div style={{ width: '120px', height: '60px', background: 'rgba(255,255,255,0.2)', borderRadius: '4px' }}></div>
+          </div>
+          <div style={{ background: '#f3f4f6', borderRadius: '12px', padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>+ New Public Lesson</h3>
+              <p style={{ color: '#6b7280', margin: 0, fontSize: '0.95rem' }}>Anyone with a link can join</p>
+            </div>
+            <div style={{ width: '120px', height: '60px', background: '#e5e7eb', borderRadius: '4px' }}></div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid #e5e7eb' }}>
+            {['All Classes', 'As Teacher', 'As Student', 'Pending', 'Ended'].map(tab => (
+              <button
+                key={tab}
+                style={{
+                  padding: '0.5rem 0',
+                  border: 'none',
+                  borderBottom: tab === 'All Classes' ? '2px solid #111827' : '2px solid transparent',
+                  background: 'transparent',
+                  fontSize: '0.95rem',
+                  fontWeight: tab === 'All Classes' ? '600' : '400',
+                  cursor: 'pointer'
+                }}
+              >
+                {tab}
+              </button>
             ))}
           </div>
-        )}
-      </main>
-
-      {/* Create Class Modal */}
-      {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-          <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', width: '100%', maxWidth: '450px' }}>
-            <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.3rem', color: '#1e293b' }}>Create New Class</h3>
-            <form onSubmit={handleCreateClass} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.4rem', color: '#334155' }}>Class Name</label>
-                <input
-                  type="text"
-                  value={newClassName}
-                  onChange={(e) => setNewClassName(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '1rem' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.4rem', color: '#334155' }}>Description</label>
-                <textarea
-                  value={newClassDesc}
-                  onChange={(e) => setNewClassDesc(e.target.value)}
-                  rows={3}
-                  style={{ width: '100%', padding: '0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '1rem', resize: 'vertical' }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ padding: '0.6rem 1.2rem', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'white' }}>
-                  Cancel
-                </button>
-                <button type="submit" style={{ padding: '0.6rem 1.2rem', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#2563eb', color: 'white' }}>
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
-      )}
-    </div>
-  );
-};
 
-export default Dashboard;
+        <div style={{ width: '280px', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <div style={{ height: '140px', background: 'url(https://picsum.photos/id/10/400/200) center/cover' }}></div>
+          <div style={{ padding: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>📄</div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '1rem' }}>maasim</h4>
+                <p style={{ margin: '0', fontSize: '0.85rem', color: '#6b7280' }}>paelmog
