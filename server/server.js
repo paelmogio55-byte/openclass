@@ -1,27 +1,31 @@
 // Import required modules
 const express = require('express');
+const cors = require('cors'); // added for frontend connection
 const { Sequelize } = require('sequelize');
 const app = express();
 
-// Middleware
+// Enable CORS so your frontend can connect
+app.use(cors());
+
+// Middleware to read JSON and form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ NEW: Homepage route (fixes "Cannot GET /")
+// ✅ Homepage route
 app.get('/', (req, res) => {
   res.send(`
     <h1>✅ OpenClass Server is LIVE!</h1>
     <p>Status: Running correctly</p>
     <p>Database: Connected</p>
-    <p>Your API is ready to use.</p>
+    <p>API URL: https://openclass-gqzp.onrender.com</p>
   `);
 });
 
 // --------------------------
-// KEEP ALL YOUR ORIGINAL CODE BELOW THIS LINE
+// YOUR ORIGINAL CODE STARTS HERE
 // --------------------------
 
-// Example database connection (adjust if yours is different)
+// Database connection
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: './database.sqlite'
@@ -32,8 +36,8 @@ sequelize.authenticate()
   .then(() => console.log('✅ Database connected & ready'))
   .catch(err => console.error('❌ Database connection error:', err));
 
-// Add your existing routes, models, and logic here
-// For example:
+// 📌 Add all your original routes, models, and code here
+// Example:
 // app.use('/api/auth', require('./routes/auth'));
 // app.use('/api/courses', require('./routes/courses'));
 
